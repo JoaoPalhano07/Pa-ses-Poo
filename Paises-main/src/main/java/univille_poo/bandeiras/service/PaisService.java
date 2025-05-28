@@ -9,31 +9,40 @@ import univille_poo.bandeiras.repository.PaisRepository;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class PaisService {
 
+    private final PaisRepository paisRepository;
+
+    public Pais salvar(Pais pais) {
+        return paisRepository.save(pais);
+    }
+
+    public Optional<Pais> bucarPorid(Long id) {
+        return paisRepository.findById(id);
+    }
+
+    public void excluir(Long id) {
+        paisRepository.deleteById(id);
+    }
+
     private static final List<Pais> listaDePaises = new ArrayList<>();
 
-    public PaisService() {
-        listaDePaises.add(new Pais("Brasil", "Brasília", "América do Sul"));
-        listaDePaises.add(new Pais("Argentina", "Buenos Aires", "América do Sul"));
-        listaDePaises.add(new Pais("Japão", "Tóquio", "Ásia"));
-        listaDePaises.add(new Pais("Alemanha", "Berlim", "Europa"));
-        listaDePaises.add(new Pais("Canadá", "Ottawa", "América do Norte"));
-        listaDePaises.add(new Pais("Austrália", "Camberra", "Oceania"));
-        listaDePaises.add(new Pais("Egito", "Cairo", "África"));
+    public PaisService(PaisRepository paisRepository) {
+        this.paisRepository = paisRepository;
     }
 
     public List<Pais> listar() {
-        return listaDePaises.stream()
-                .peek(pais -> pais.setUrlBandeira(getCodigoBandeira(pais.getNome())))
+        return paisRepository.findAll().stream()
+                .peek(pais -> pais.setUrlBandeira("https://flagcdn.com/w320/" + getCodigoBandeira(pais.getNome()) + ".png"))
                 .collect(Collectors.toList());
     }
 
     public List<Pais> listar(String continente, String ordenacao) {
-        List<Pais> paisesFiltrados = listaDePaises.stream()
+        List<Pais> paisesFiltrados = paisRepository.findAll().stream()
                 .filter(pais -> continente == null || continente.isEmpty() || pais.getContinente().equalsIgnoreCase(continente))
                 .collect(Collectors.toList());
 
